@@ -30,7 +30,10 @@ reactpromptwithformatinstructions = PromptTemplate(
 agent = create_react_agent(llm=llm, tools=tools, prompt=reactpromptwithformatinstructions)
 agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
 
-chain = agent_executor
+extract_output = RunnableLambda(lambda x: x["output"])
+parse_output =  RunnableLambda(lambda x: output_parser.parse(x))
+
+chain = agent_executor | extract_output | parse_output
 
 def searchagent():
     result = chain.invoke(input={

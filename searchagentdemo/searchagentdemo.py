@@ -8,13 +8,28 @@ from langchain.agents.react.agent import create_react_agent
 from langchain_openai import ChatOpenAI
 from langchain_tavily import TavilySearch
 
+from langchain_core.output_parsers.pydantic import PydanticOutputParser
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnableLambda
+
+from promptdemo import REACT_PROMPT_WITH_FORMAT_INSTRUCTIONS
+from schemas import AgentResponse
+
 tools = [TavilySearch()]
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 # This prompt expects variables: ["input", "agent_scratchpad"]
 react_prompt = hub.pull("hwchase17/react")
-agent = create_react_agent(llm=llm, tools=tools, prompt=react_prompt)
+
+output_parser = PydanticOutputParser(pydantic_object=AgentResponse)
+reactpromptwithformatinstructions = PromptTemplate(
+    input_variables=["input", "agent_scratchpad","tool_names"],
+    template=REACT_PROMPT_WITH_FORMAT_INSTRUCTIONS
+).partial(format_instructions=output_parser.get_format_instructions())
+
+agent = create_react_agent(llm=llm, tools=tools, prompt=reactpromptwithformatinstructions)
 agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
+
 chain = agent_executor
 
 def searchagent():

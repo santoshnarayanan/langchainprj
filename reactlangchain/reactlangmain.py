@@ -1,13 +1,13 @@
 from typing import Union
 
 from dotenv import load_dotenv
-from langchain_core.agents import AgentStep, AgentAction, AgentFinish
+from langchain_core.agents import AgentAction, AgentFinish
 from langchain_core.prompts import PromptTemplate
 from langchain.tools import tool, Tool
 from langchain_core.tools import render_text_description
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_react_agent, AgentExecutor
-from typing import List, Union
+from typing import List
 
 load_dotenv()
 

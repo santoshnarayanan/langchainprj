@@ -1,19 +1,16 @@
 from dotenv import load_dotenv
-import os
-load_dotenv()
-
 from langchain import hub
 from langchain.agents import AgentExecutor
 from langchain.agents.react.agent import create_react_agent
 from langchain_openai import ChatOpenAI
 from langchain_tavily import TavilySearch
-
 from langchain_core.output_parsers.pydantic import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda
-
 from promptdemo import REACT_PROMPT_WITH_FORMAT_INSTRUCTIONS
 from schemas import AgentResponse
+
+load_dotenv()
 
 tools = [TavilySearch()]
 

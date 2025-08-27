@@ -1,9 +1,13 @@
+from typing import Union
+
 from dotenv import load_dotenv
+from langchain_core.agents import AgentStep, AgentAction, AgentFinish
 from langchain_core.prompts import PromptTemplate
-from langchain.tools import tool
+from langchain.tools import tool, Tool
 from langchain_core.tools import render_text_description
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_react_agent, AgentExecutor
+from typing import List, Union
 
 load_dotenv()
 
@@ -46,6 +50,11 @@ Question: {input}
     )
     return prompt
 
+def find_tool_by_name(tools: List[Tool], tool_name: str) -> Tool:
+    for tool in tools:
+        if tool.name == tool_name:
+            return tool
+    raise ValueError(f"Tool {tool_name} not found")
 
 if __name__ == "__main__":
     print("ReAct LangChain project")
@@ -59,5 +68,14 @@ if __name__ == "__main__":
     agent = create_react_agent(llm=llm, tools=tools, prompt=prompt)
     executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
-    result = executor.invoke({"input": "What is the length of 'DOG' in characters?"})
-    print("Final:", result["output"])
+    # result = executor.invoke({"input": "What is the length of 'DOG' in characters?"})
+    agent_step: Union[AgentAction, AgentFinish] = executor.invoke({"input": "What is the length of 'DOG' in characters?"})
+    print("Final:", agent_step)
+
+    if isinstance(agent_step, AgentFinish):
+        tool_name = agent_step.tool_name
+        tool_to_use = find_tool_by_name(tools, tool_name)
+        tool_input = agent_step.tool_input
+
+        observation = tool_to_use.func(str(tool_input))
+        print("Observation:", observation)
